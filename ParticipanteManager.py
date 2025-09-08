@@ -1,15 +1,51 @@
-import csv  # Faltaba este import
+"""
+Módulo ParticipanteManager - Gestor de participantes para el Sistema Solrock Battle Association.
+
+Este módulo proporciona la funcionalidad CRUD (Crear, Leer, Actualizar, Eliminar)
+para gestionar los participantes del torneo Pokémon.
+"""
+
+import csv
 import re
 from Entidad import Entidad
 
 class ParticipanteManager(Entidad):
+    """
+    Gestiona todas las operaciones relacionadas con participantes del torneo.
+    
+    Hereda de la clase abstracta Entidad y implementa los métodos específicos
+    para el manejo de participantes con validaciones de datos.
+    
+    Attributes:
+        archivo (str): Nombre del archivo CSV ('participantes.csv')
+        campos (list): Lista de campos ['id_participante', 'nombre', 'edad', 'ciudad', 'telefono']
+    """
+    
     def __init__(self):
+        """
+        Inicializa el manager de participantes con su archivo y estructura de datos.
+        
+        Llama al constructor de la clase base para configurar el archivo CSV
+        con los campos específicos para participantes.
+        """
         super().__init__(
             "participantes.csv", 
             ["id_participante", "nombre", "edad", "ciudad", "telefono"]
         )
     
-    def agregar(self):
+    def agregar(self) -> int:
+        """
+        Agrega un nuevo participante al sistema con validación de datos.
+        
+        Solicita al usuario los datos del participante, valida cada campo
+        y guarda la información en el archivo CSV.
+        
+        Returns:
+            int: ID del participante creado si es exitoso, None si ocurre un error
+        
+        Raises:
+            ValueError: Si algún campo no pasa las validaciones
+        """
         print("\n--- AGREGAR PARTICIPANTE ---")
         try:
             with open(self.archivo, 'a', newline='', encoding='utf-8') as file:
@@ -17,22 +53,27 @@ class ParticipanteManager(Entidad):
                 
                 nuevo_id = self.obtener_ultimo_id()
                 
+                # Validación y captura de nombre
                 nombre = input("Nombre: ")
                 if not nombre:
                     raise ValueError("El nombre no puede estar vacío.")
                 
+                # Validación y captura de edad
                 edad = int(input("Edad: "))
                 if edad < 1 or edad > 120:
                     raise ValueError("La edad debe estar entre 1 y 120 años.")
                 
+                # Validación y captura de ciudad
                 ciudad = input("Ciudad: ")
                 if not ciudad:
                     raise ValueError("La ciudad no puede estar vacía.")
                 
+                # Validación y captura de teléfono
                 telefono = input("Teléfono: ")
                 if not re.match(r'^[\d\s\-\+\(\)]+$', telefono):
                     raise ValueError("El formato del teléfono no es válido.")
                 
+                # Guardar el nuevo participante
                 writer.writerow([nuevo_id, nombre, edad, ciudad, telefono])
                 print(f"Participante agregado con éxito. ID: {nuevo_id}")
                 return nuevo_id
@@ -44,7 +85,21 @@ class ParticipanteManager(Entidad):
             print(f"Error al agregar participante: {e}")
             return None
     
-    def consultar(self, id_participante):
+    def consultar(self, id_participante: str) -> list:
+        """
+        Consulta un participante específico por su ID.
+        
+        Args:
+            id_participante (str): ID del participante a consultar (puede ser string)
+        
+        Returns:
+            list: Datos del participante [id, nombre, edad, ciudad, telefono] si se encuentra,
+                None si no existe
+        
+        Raises:
+            ValueError: Si el ID no es un número entero válido
+            
+        """
         print("\n--- CONSULTAR PARTICIPANTE ---")
         try:
             id_participante = int(id_participante)
@@ -68,7 +123,23 @@ class ParticipanteManager(Entidad):
             print(f"Error al consultar participante: {e}")
             return None
     
-    def editar(self, id_participante):
+    def editar(self, id_participante: str) -> bool:
+        """
+        Edita los datos de un participante existente.
+        
+        Permite modificar todos los campos de un participante manteniendo
+        validaciones consistentes con el método agregar.
+        
+        Args:
+            id_participante (str): ID del participante a editar
+        
+        Returns:
+            bool: True si la edición fue exitosa, False si ocurrió un error
+        
+        Raises:
+            ValueError: Si algún campo no pasa las validaciones
+            
+        """
         print("\n--- EDITAR PARTICIPANTE ---")
         try:
             id_participante = int(id_participante)
@@ -85,10 +156,12 @@ class ParticipanteManager(Entidad):
             
             print(f"\nEditando participante: {row[1]}")
             
+            # Editar nombre con validación
             nombre = input(f"Nuevo nombre ({row[1]}): ") or row[1]
             if not nombre:
                 raise ValueError("El nombre no puede estar vacío.")
             
+            # Editar edad con validación
             try:
                 edad = input(f"Nueva edad ({row[2]}): ")
                 edad = int(edad) if edad else int(row[2])
@@ -97,10 +170,12 @@ class ParticipanteManager(Entidad):
             except ValueError:
                 raise ValueError("La edad debe ser un número entero.")
             
+            # Editar ciudad con validación
             ciudad = input(f"Nueva ciudad ({row[3]}): ") or row[3]
             if not ciudad:
                 raise ValueError("La ciudad no puede estar vacía.")
             
+            # Editar teléfono con validación
             telefono = input(f"Nuevo teléfono ({row[4]}): ") or row[4]
             if not re.match(r'^[\d\s\-\+\(\)]+$', telefono):
                 raise ValueError("El formato del teléfono no es válido.")
@@ -123,7 +198,19 @@ class ParticipanteManager(Entidad):
             print(f"Error al editar participante: {e}")
             return False
     
-    def eliminar(self, id_participante):
+    def eliminar(self, id_participante: str) -> bool:
+        """
+        Elimina un participante del sistema después de confirmación.
+        
+        Args:
+            id_participante (str): ID del participante a eliminar
+        
+        Returns:
+            bool: True si la eliminación fue exitosa, False si ocurrió un error
+        
+        Raises:
+            ValueError: Si el ID no es un número entero válido
+        """
         print("\n--- ELIMINAR PARTICIPANTE ---")
         try:
             id_participante = int(id_participante)
@@ -145,6 +232,7 @@ class ParticipanteManager(Entidad):
                 if row_data and row_data[0].isdigit() and int(row_data[0]) != id_participante:
                     nuevos_rows.append(row_data)
             
+            # Confirmación de eliminación
             print(f"¿Está seguro de eliminar al participante: {row[1]}?")
             confirmacion = input("Escriba 'SI' para confirmar: ")
             

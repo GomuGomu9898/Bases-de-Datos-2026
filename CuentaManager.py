@@ -3,7 +3,26 @@ import csv
 from Entidad import Entidad
 
 class CuentaManager(Entidad):
+    """
+    Gestiona las operaciones CRUD para las cuentas de usuarios en el sistema.
+    
+    Hereda de la clase abstracta Entidad y se encarga de manejar todas las
+    operaciones relacionadas con cuentas: creación, consulta, edición y eliminación.
+    
+    Attributes:
+        archivo (str): Nombre del archivo CSV donde se almacenan las cuentas
+        campos (list): Lista de nombres de columnas para el archivo CSV
+        participante_manager (ParticipanteManager): Instancia para gestionar participantes
+    """
+    
     def __init__(self, participante_manager):
+        """
+        Inicializa el manager de cuentas.
+        
+        Args:
+            participante_manager (ParticipanteManager): Instancia del manager de participantes
+                para validar la existencia de participantes al crear cuentas.
+        """
         super().__init__(
             "cuentas.csv", 
             ["id_cuenta", "id_participante", "usuario", "contrasena", "fecha_creacion"]
@@ -11,6 +30,18 @@ class CuentaManager(Entidad):
         self.participante_manager = participante_manager
     
     def agregar(self):
+        """
+        Agrega una nueva cuenta al sistema.
+        
+        Solicita al usuario los datos necesarios para crear una cuenta, valida
+        que el participante exista y guarda la información en el archivo CSV.
+        
+        Returns:
+            int or None: ID de la cuenta creada si es exitoso, None si ocurre un error
+        
+        Raises:
+            ValueError: Si los datos ingresados no pasan las validaciones
+        """
         print("\n--- AGREGAR CUENTA ---")
         try:
             # Verificar que el participante existe
@@ -50,6 +81,16 @@ class CuentaManager(Entidad):
             return None
     
     def consultar(self, id_cuenta):
+        """
+        Consulta una cuenta específica por su ID.
+        
+        Args:
+            id_cuenta (str or int): ID de la cuenta a consultar
+        
+        Returns:
+            list or None: Datos de la cuenta si se encuentra, None si no existe
+        
+        """
         print("\n--- CONSULTAR CUENTA ---")
         try:
             id_cuenta = int(id_cuenta)
@@ -74,6 +115,18 @@ class CuentaManager(Entidad):
             return None
     
     def editar(self, id_cuenta):
+        """
+        Edita los datos de una cuenta existente.
+        
+        Permite modificar el usuario, contraseña, fecha de creación y participante
+        asociado a una cuenta. Valida que el nuevo participante exista.
+        
+        Args:
+            id_cuenta (str or int): ID de la cuenta a editar
+        
+        Returns:
+            bool: True si la edición fue exitosa, False si ocurrió un error
+        """
         print("\n--- EDITAR CUENTA ---")
         try:
             id_cuenta = int(id_cuenta)
@@ -129,6 +182,15 @@ class CuentaManager(Entidad):
             return False
     
     def eliminar(self, id_cuenta):
+        """
+        Elimina una cuenta del sistema después de confirmación.
+        
+        Args:
+            id_cuenta (str or int): ID de la cuenta a eliminar
+        
+        Returns:
+            bool: True si la eliminación fue exitosa, False si ocurrió un error
+        """
         print("\n--- ELIMINAR CUENTA ---")
         try:
             id_cuenta = int(id_cuenta)
@@ -146,9 +208,9 @@ class CuentaManager(Entidad):
             # Filtrar la cuenta a eliminar
             nuevos_rows = [rows[0]]  # Mantener la cabecera
             
-            for row in rows[1:]:  # Saltar la cabecera
-                if row and row[0].isdigit() and int(row[0]) != id_cuenta:
-                    nuevos_rows.append(row)
+            for row_data in rows[1:]:  # Saltar la cabecera
+                if row_data and row_data[0].isdigit() and int(row_data[0]) != id_cuenta:
+                    nuevos_rows.append(row_data)
             
             print(f"¿Está seguro de eliminar la cuenta: {row[2]}?")
             confirmacion = input("Escriba 'SI' para confirmar: ")
